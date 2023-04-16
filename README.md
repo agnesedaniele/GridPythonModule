@@ -7,7 +7,7 @@ For more details we refer to the associated paper "[GridPyM: a Python module to 
 
 **To install**, write `pip install GridPythonModule` in a terminal.
 
-**To import**, write in a Python terminal `from GridPythonModule import *` 
+**To import**, write in a Python terminal `import GridPythonModule`, and `from GridPythonModule import *` to import its functions. 
 
 **Requirements**: Python3. 
 
