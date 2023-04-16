@@ -1,0 +1,12 @@
+Metadata-Version: 2.1
+Name: GridPythonModule
+Version: 0.1.0
+Summary: A Sage compatible Python module to manipulate and simplify grid diagrams.
+Home-page: https://github.com/agnesedaniele/GridPythonModule
+Author: Agnese Barbensi and Daniele Celoria
+Author-email: dceloria.maths@gmail.com
+License: GNU general public
+Classifier: Development Status :: 1 - Planning
+Classifier: Intended Audience :: Science/Research
+Classifier: Programming Language :: Python :: 3
+License-File: LICENSE
