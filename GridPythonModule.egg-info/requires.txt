@@ -1,3 +1,0 @@
-simpy
-random2
-matplotlib
