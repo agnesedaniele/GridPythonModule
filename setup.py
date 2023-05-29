@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='GridPythonModule',
-    version='0.1.0',    
+    version='0.1.1',    
     description='A Sage compatible Python module to manipulate and simplify grid diagrams.',
     url='https://github.com/agnesedaniele/GridPythonModule',
     author='Agnese Barbensi and Daniele Celoria',
