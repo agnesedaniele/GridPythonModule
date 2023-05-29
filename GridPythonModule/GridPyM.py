@@ -1,5 +1,5 @@
 #########################################################################
-#          V1.1  20-09-22
+#          V1.2  29-05-23
 
 
 #          For any question, contact us at agnese.barbensi or 
@@ -80,7 +80,7 @@ def available_knots(cr_number = True):
     """
     if  cr_number < 0 or cr_number > 8:
         raise Exception("We only have links up to 8 crossings!")
-    if cr_number not in [True, 3,4,5,6,7,8]:
+    elif cr_number not in [True, 3,4,5,6,7,8]:
         raise Exception("Invalid crossing number input")
     list_of_knots = ['3_1', '4_1', '5_1', '5_2', '6_1', '6_2', '6_3', '7_1', '7_2', '7_3', '7_4', '7_5', '7_6', '7_7', '8_1', '8_2', '8_3', '8_4', '8_5', '8_6', '8_7', '8_8', '8_9', '8_10', '8_11', '8_12', '8_13', '8_14', '8_15', '8_16', '8_17', '8_18', '8_19', '8_20', '8_21']
     if cr_number == True or cr_number == 3:
@@ -129,7 +129,7 @@ def available_legendrian_knots(cr_number = True):
     
     """
     if  cr_number <= 0 or cr_number > 7:
-        raise Exception("We only have nontrivial knots up to 8 crossings!")
+        raise Exception("We only have nontrivial knots up to 7 crossings!")
     if cr_number not in [True, 3,4,5,6,7]:
         raise Exception("Invalid input")
     list_of_knots = ['3_1', 'm(3_1)', '4_1', '5_1', 'm(5_1)', '5_2', 'm(5_2)', '6_1', 'm(6_1)', '6_2', 'm(6_2)', '6_3', '7_1', 'm(7_1)', '7_2', 'm(7_2)', '7_3', 'm(7_3)', '7_4', 'm(7_4)', '7_5', 'm(7_5)', '7_6', 'm(7_6)', '7_7', 'm(7_7)']
@@ -218,8 +218,8 @@ def coherent_bs(input_grid, where, which = 'rows'):
         raise Exception("The selected rows/columns are not a band attachment site")   
     if (which == 'c' or which == 'columns') and _check_rows_for_bands(rotate(input_grid,1),where)[0] != 0:
         raise Exception("The selected rows/columns are not a band attachment site")
-    A = input_grid[0]
-    B = input_grid[1]
+    A = input_grid[0].copy()
+    B = input_grid[1].copy()
     if which == 'rows' or which == 'r':    
         remember = [A[where], A[where+1]]
         A[where] = remember[1]
@@ -249,17 +249,11 @@ def commute_rows(input_grid, where, interleaving = 'N', verbose = False):
     A grid where the two selected rows are commuted, according to the interleaving
     parameter.
 
-    EXAMPLES::
-    
-    >> A = [[2, 3, 0, 1, 4], [3, 4, 1, 0, 2]]
-    >> B = commute_columns(A,1)
-    >> B
-    [[1, 3, 0, 2, 4], [3, 4, 2, 0, 1]]
     
     """
     if check_grid(input_grid) == 1:
         raise Exception("Invalid Input grid")
-    if where > len(input_grid[0]) or where < 0 or interleaving not in ['A','Y','N']:
+    if where > len(input_grid[0]) -1 or where < 0 or interleaving not in ['A','Y','N']:
         raise Exception("Invalid parameters")
     A = input_grid[0]
     B = input_grid[1]
@@ -1653,7 +1647,7 @@ def stabilisation(input_grid, row = 3, kind = 'XNE'):
     """
     if check_grid(input_grid) == 1:
         raise Exception("Invalid Input")
-    if kind not in ['XNE','XNW','XSE','XSW','ONE','ONW','OSE','OSW'] or 0 > row  or  row > len(input_grid[0]) :
+    if kind not in ['XNE','XNW','XSE','XSW','ONE','ONW','OSE','OSW'] or 0 > row  or  row > len(input_grid[0]) -1 :
         raise Exception("Invalid kind of stabilisation!")
     n = len(input_grid[0])
     if kind[0] == 'X':
