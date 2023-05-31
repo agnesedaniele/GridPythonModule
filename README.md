@@ -15,4 +15,4 @@ The following packages are needed: matplotlib, sympy, random2
 
 **List of available functions**: 'ascending_cusps', 'available_knots', 'available_legendrian_knots', 'check_grid', 'coherent_bs', 'commute_columns', 'commute_rows', 'connected_sum', 'convert_to_Sage', 'convert_to_braid', 'crossing_number', 'cyclic_shift', 'descending_cusps', 'destabilize', 'destabilize_all', 'disjoint_union', 'draw_grid', 'Gauss_code', 'generate_random_grid', 'generate_torus_link', 'generate_twist_knot', 'generate_unknot', 'generate_unlink', 'grid_length', 'grid_number', 'invert_orientation', 'load_knot', 'load_legendrian_knot', 'mirror_grid', 'number_of_components', 'parallel_copies', 'perform_all_moves', 'rotate', 'rotate_once', 'rotation_number', 'scramble_grid', 'self_linking', 'simplify_grid', 'stabilisation', 'thurston_bennequin', 'uncoherent_bs', 'writhe'.
 
-**Testing and coverage** Testing is performed by the GridPythonModule_test.py
+**Testing and coverage** Testing is performed by the GridPythonModule_test.py using [pytest](https://docs.pytest.org/en/7.3.x/). 
