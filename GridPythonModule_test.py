@@ -16,6 +16,8 @@ def test_check_grid():
 
     assert check_grid(no_grid) == 1
 
+    assert check_grid([test_grid[0]]) == 1
+
 ######################################################################################################################
 
 
@@ -25,6 +27,16 @@ def test_available_knots():
          available_knots(10)
     assert str(exc_info.value) == 'We only have links up to 8 crossings!'
 
+
+    with pytest.raises(Exception) as exc_info:
+         available_knots(-1)
+    assert str(exc_info.value) == 'We only have links up to 8 crossings!'
+
+    with pytest.raises(Exception) as exc_info:
+         available_knots(False)
+    assert str(exc_info.value) == "Invalid crossing number input"
+
+
 ######################################################################################################################
 
 
@@ -33,6 +45,7 @@ def test_available_legendrian_knots():
     with pytest.raises(Exception) as exc_info:
          available_legendrian_knots(10)
     assert str(exc_info.value) == 'We only have nontrivial knots up to 7 crossings!'
+
 
 ######################################################################################################################
 
@@ -44,6 +57,7 @@ def test_load_knot():
     with pytest.raises(Exception) as exc_info:
          load_knot('trefoil')
     assert str(exc_info.value) == "Invalid input name! Try the command 'available_knots' to see which knots are pre-loaded."
+
 
 ######################################################################################################################
 
@@ -67,12 +81,25 @@ def test_generate_torus_link():
          generate_torus_link(0,2)
     assert str(exc_info.value) == "Only non-zero coefficients"
 
+    with pytest.raises(Exception) as exc_info:
+         generate_torus_link(2,0)
+    assert str(exc_info.value) == "Only non-zero coefficients"
+
+    assert generate_torus_link(3,-2) == [[0, 1, 2, 3, 4], [3, 4, 0, 1, 2]]
+
 ######################################################################################################################
 
 
 def test_generate_twist_knot():
 
     assert generate_twist_knot(3, '+') == [[3, 2, 5, 4, 1, 0, 6], [0, 4, 3, 6, 5, 2, 1]]
+
+    assert generate_twist_knot(3, '-') == [[0, 5, 3, 2, 4, 7, 6, 1], [4, 2, 1, 0, 6, 5, 3, 7]]
+
+    assert generate_twist_knot(-3, '+') == [[5, 6, 1, 4, 2, 3, 7, 0], [7, 4, 5, 0, 6, 1, 2, 3]]
+
+    assert generate_twist_knot(-3, '-') == [[1, 2, 5, 6, 3, 4, 0], [6, 0, 1, 4, 5, 2, 3]]
+
 
     with pytest.raises(Exception) as exc_info:
          generate_twist_knot(0)
@@ -99,6 +126,8 @@ def test_generate_unknot():
 def test_generate_unlink():
 
     assert generate_unlink(2) == [[0, 1, 2, 3], [1, 0, 3, 2]]
+
+    assert generate_unlink(3) == [[0, 1, 2, 3, 4, 5], [1, 0, 3, 2, 5, 4]]
 
     with pytest.raises(Exception) as exc_info:
          generate_unlink(0)
@@ -146,8 +175,15 @@ def test_cyclic_shift():
     assert cyclic_shift(test_grid, 1,0) == [[4, 0, 1, 2, 3], [1, 2, 3, 4, 0]]
 
     with pytest.raises(Exception) as exc_info:
-        cyclic_shift(no_grid,0)
+        cyclic_shift(no_grid,1,0)
+    assert str(exc_info.value) == 'Invalid Input'
 
+    with pytest.raises(Exception) as exc_info:
+        cyclic_shift(test_grid,-1,0)
+    assert str(exc_info.value) == 'Invalid Input'
+
+    with pytest.raises(Exception) as exc_info:
+        cyclic_shift(test_grid,1,-2)
     assert str(exc_info.value) == 'Invalid Input'
 
 ######################################################################################################################
@@ -157,12 +193,36 @@ def test_simplify_grid():
 
     assert sorted(simplify_grid(generate_unknot(10), effort = 'high')) == [[0, 1], [1, 0]]
 
+    with pytest.raises(Exception) as exc_info:
+        simplify_grid(no_grid, 'high')
+    assert str(exc_info.value) == 'Invalid Input'
+
+    with pytest.raises(Exception) as exc_info:
+        simplify_grid(generate_unknot(10), effort = 'else')
+    assert str(exc_info.value) == 'Invalid effort!'
+
+    with pytest.raises(Exception) as exc_info:
+        simplify_grid(generate_unknot(10), effort = 0)
+    assert str(exc_info.value) == 'Invalid effort!'
+
 ######################################################################################################################
 
 
 def test_scramble_grid():
 
-    assert grid_number(scramble_grid(generate_unknot(3))) > 3
+    assert check_grid(scramble_grid(test_grid)) == 0
+
+    with pytest.raises(Exception) as exc_info:
+        scramble_grid(no_grid, 'high')
+    assert str(exc_info.value) == 'Invalid Input'
+
+    with pytest.raises(Exception) as exc_info:
+        scramble_grid(generate_unknot(10), effort = 'else')
+    assert str(exc_info.value) == 'Invalid effort!'
+
+    with pytest.raises(Exception) as exc_info:
+        scramble_grid(generate_unknot(10), effort = 0)
+    assert str(exc_info.value) == 'Invalid effort!'
 
 ######################################################################################################################
 
@@ -182,10 +242,25 @@ def test_stabilisation():
         stabilisation(no_grid,0, 'XSE')
     assert str(exc_info.value) == 'Invalid Input'
 
+
 ######################################################################################################################
 
 
 def test_destabilize():
+
+    with pytest.raises(Exception) as exc_info:
+        destabilize(no_grid,0)
+    assert str(exc_info.value) == 'Invalid Input'
+
+    with pytest.raises(Exception) as exc_info:
+        destabilize([[1,0], [0,1]],0, verbose = True)
+    assert str(exc_info.value) == 'Grids of size 2 cannot be destabilized'
+
+    assert destabilize([[1,0], [0,1]],0, verbose = False) == 0 
+
+    with pytest.raises(Exception) as exc_info:
+        destabilize(test_grid,-1)
+    assert str(exc_info.value) == 'The index must be between 0 and grid number'
 
     for move in moves:
         for pos in range(0,len(test_grid[0])):
@@ -228,6 +303,18 @@ def test_convert_to_braid():
 
     assert convert_to_braid(test_grid) == [-1,-1,-1]
 
+    assert convert_to_braid(test_grid, optimized = 'N') == [-1,-2,-1, -2]
+
+    assert convert_to_braid(test_grid, optimized = 'S') == [-1,-1,-1]
+
+    with pytest.raises(Exception) as exc_info:
+        assert convert_to_braid(no_grid)
+    assert str(exc_info.value) == 'Invalid Input'
+
+    with pytest.raises(Exception) as exc_info:
+        assert convert_to_braid(test_grid, 'other')
+    assert str(exc_info.value) == 'Invalid optimization input.'
+
 ######################################################################################################################
 
 
@@ -262,6 +349,10 @@ def test_writhe():
     assert writhe(test_grid) == -3
 
     assert writhe(mirror_grid(test_grid)) == 3
+
+    with pytest.raises(Exception) as exc_info:
+        assert writhe(no_grid)
+    assert str(exc_info.value) == 'Invalid Input'
 
 ######################################################################################################################
 
@@ -321,6 +412,10 @@ def test_parallel_copies():
 def test_Gauss_code():
 
     assert Gauss_code(test_grid) == [[[-1, 2, -3, 1, -2, 3]], [-1, -1, -1]]
+
+    with pytest.raises(Exception) as exc_info:
+        Gauss_code(no_grid)
+    assert str(exc_info.value) == 'Invalid grid Input!'
 
     with pytest.raises(Exception) as exc_info:
         Gauss_code(test_link)
@@ -387,6 +482,10 @@ def test_perform_all_moves():
  [[0, 2, 3, 4, 5, 1], [3, 4, 5, 0, 1, 2]],
  [[0, 1, 3, 4, 5, 2], [3, 4, 5, 0, 2, 1]]]
 
+    with pytest.raises(Exception) as exc_info:
+        perform_all_moves(no_grid)
+    assert str(exc_info.value) == 'Invalid Input'
+
 ######################################################################################################################
 
 
@@ -427,7 +526,6 @@ def test_commute_columns():
    commute_columns(test_link, 4, 'N') == 0
 
 
-
 ######################################################################################################################
 
 
@@ -441,6 +539,10 @@ def test_commute_rows():
 
     assert commute_rows(test_link, 1, 'N') == 0
 
+    with pytest.raises(Exception) as exc_info:
+        commute_rows(no_grid, 1, 'A')
+    assert str(exc_info.value) == 'Invalid Input grid'
+
 
 ######################################################################################################################
 
@@ -453,6 +555,13 @@ def test_uncoherent_bs():
         uncoherent_bs(no_grid,0)
     assert str(exc_info.value) == 'Invalid Input grid'
 
+    with pytest.raises(Exception) as exc_info:
+        uncoherent_bs(test_link,1)
+    assert str(exc_info.value) == 'The Input grid does not represent a knot'
+
+    with pytest.raises(Exception) as exc_info:
+        uncoherent_bs(generate_unknot(3),0)
+    assert str(exc_info.value) == 'The selected rows/columns are not a band attachment site'
 ######################################################################################################################
   
 
@@ -479,6 +588,16 @@ def test_coherent_bs():
 
 ######################################################################################################################
 
+
+def test_draw_grid():
+
+    with pytest.raises(Exception) as exc_info:
+        draw_grid(no_grid)
+    assert str(exc_info.value) == 'Invalid grid Input!'
+
+    with pytest.raises(Exception) as exc_info:
+        draw_grid(test_grid, markings = 'other')
+    assert str(exc_info.value) == 'Invalid markings option.'
 
 
 
