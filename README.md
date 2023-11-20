@@ -1,3 +1,5 @@
+[![CI](https://github.com/kamalsaleh/GridPythonModule/actions/workflows/Tests.yml/badge.svg)](https://github.com/kamalsaleh/GridPythonModule/actions/workflows/Tests.yml)
+
 # GridPythonModule
 A Sage compatible Python module to manipulate and simplify grid diagrams.
 
