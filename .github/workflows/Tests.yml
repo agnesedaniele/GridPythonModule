@@ -28,3 +28,8 @@ jobs:
         run: |
           coverage run -m pytest GridPythonModule_test.py -v
           coverage report -m
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
