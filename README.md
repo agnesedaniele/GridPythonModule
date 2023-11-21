@@ -1,4 +1,10 @@
-[![CI](https://github.com/agnesedaniele/GridPythonModule/actions/workflows/Tests.yml/badge.svg)](https://github.com/agnesedaniele/GridPythonModule/actions/workflows/Tests.yml)
+<!-- BEGIN HEADER -->
+
+ | Build Status  | Code Coverage |
+ | ------------- | --------------|
+ | [![Build Status][tests-img]][tests-url] | [![Code Coverage][codecov-img]][codecov-url] |
+ 
+<!-- END HEADER -->
 
 # GridPythonModule
 A Sage compatible Python module to manipulate and simplify grid diagrams.
@@ -17,4 +23,13 @@ The following packages are needed: matplotlib, sympy, random2
 
 **List of available functions**: 'ascending_cusps', 'available_knots', 'available_legendrian_knots', 'check_grid', 'coherent_bs', 'commute_columns', 'commute_rows', 'connected_sum', 'convert_to_Sage', 'convert_to_braid', 'crossing_number', 'cyclic_shift', 'descending_cusps', 'destabilize', 'destabilize_all', 'disjoint_union', 'draw_grid', 'Gauss_code', 'generate_random_grid', 'generate_torus_link', 'generate_twist_knot', 'generate_unknot', 'generate_unlink', 'grid_length', 'grid_number', 'invert_orientation', 'load_knot', 'load_legendrian_knot', 'mirror_grid', 'number_of_components', 'parallel_copies', 'perform_all_moves', 'rotate', 'rotate_once', 'rotation_number', 'scramble_grid', 'self_linking', 'simplify_grid', 'stabilisation', 'thurston_bennequin', 'uncoherent_bs', 'writhe'.
 
-**Testing and coverage** Testing is performed by the GridPythonModule_test.py using [pytest](https://docs.pytest.org/en/7.3.x/). 
+**Testing and coverage** Testing is performed by the GridPythonModule_test.py using [pytest](https://docs.pytest.org/en/7.3.x/).
+
+<!-- BEGIN FOOTER -->
+[tests-img]: https://github.com/agnesedaniele/GridPythonModule/actions/workflows/Tests.yml/badge.svg?branch=main
+[tests-url]: https://github.com/agnesedaniele/GridPythonModule/actions/workflows/Tests.yml?query=branch%3Amain
+
+[codecov-img]: https://codecov.io/gh/agnesedaniele/GridPythonModule/branch/main/graph/badge.svg
+[codecov-url]: https://app.codecov.io/gh/agnesedaniele/GridPythonModule/tree/main
+<!-- END FOOTER -->
+ 
