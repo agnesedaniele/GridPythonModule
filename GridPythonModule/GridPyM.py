@@ -338,13 +338,14 @@ def connected_sum(input_grid1,input_grid2):
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-def convert_to_braid(input_grid, optimized = 'Y'):
+def convert_to_braid(input_grid, optimized = 'Y', verbose = False):
     r"""
     Return a braid word whose closure represents the same link as the input grid.  
     The "optimized" option can be either "Y", "N", "S". The first gives as output the 
     minimal braid among two possible choices (obtained by suitably rotating the grid),
     the second just output the first braid obtained, while the last option first attempts
-    to simplify the grid before producing the smallest braid.
+    to simplify the grid before producing the smallest braid. The verbose option controls
+    whether additional output is printed for grids representing the trivial braid.
     
     OUTPUT:
 
@@ -374,7 +375,8 @@ def convert_to_braid(input_grid, optimized = 'Y'):
         firstB = _aux_braid(input_grid)
         secondB = [-a for a in _aux_braid(rotate(input_grid,1))]
         if firstB == [] or secondB == []:
-            print('Trivial braid representing the link with %s components'%number_of_components(input_grid))
+            if verbose:
+                print('Trivial braid representing the link with %s components'%number_of_components(input_grid))
             return [1]
         if len(firstB) > len(secondB):
             return secondB
@@ -385,7 +387,8 @@ def convert_to_braid(input_grid, optimized = 'Y'):
         firstB = _aux_braid(aux_G)
         secondB = [-a for a in _aux_braid(rotate(input_grid,1))]
         if firstB == [] or secondB == []:
-            print('Trivial braid representing the link with %s components'%number_of_components(input_grid))
+            if verbose:
+                print('Trivial braid representing the link with %s components'%number_of_components(input_grid))
             return [1]
         if len(firstB) > len(secondB):
             return secondB
