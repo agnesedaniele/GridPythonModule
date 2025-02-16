@@ -1773,6 +1773,38 @@ def thurston_bennequin(input_grid):
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+def turning_number(input_grid):
+    r"""
+    Calculates the turning number of a knot grid diagram. This can be thought of
+    as a "global winding number" or a counter of the orientation of the tangent
+    vector of the knot as it completes one pass around the knot. Note that this
+    function works only for knots and not links, as yet.
+
+    OUTPUT:
+
+    An integer.
+
+    EXAMPLES::
+    >> G = generate_torus_link(3,2)
+    >> print(turning_number(G))
+    2.0
+    >> K = load_knot('5_2')
+    >> print(turning_number(K))
+    0.0
+
+    """
+    turns = _list_all_turns(input_grid)
+    dirs = _find_all_turn_directions(turns)
+    tn = 0
+    for i in range(len(dirs)):
+        if dirs[i] == 'CCW':
+            tn += 0.25
+        else:
+            tn -= 0.25
+    return tn
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 def uncoherent_bs(input_grid, where, which = 'rows'):
     r"""
     Performs a uncoherent band attachment on the grid. Can choose between a row/column
@@ -2152,6 +2184,269 @@ def _can_simplify(input_grid):
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+def _generate_coords(input_grid,XO):
+    r"""
+    Generates an array of the Cartesian coordinates of a specified set of markings of a knot grid
+    diagram. Marking type is specified by XO, with XO = 0 for "X" markings and XO = 1 for "O"
+    markings.
 
+    OUTPUT:
 
+    An nx2 array of integers, with n = grid size.
 
+    EXAMPLES::
+    >> G = generate_torus_link(3,2)
+    >> print(_generate_coords(G,0))
+    [[4 0]
+    [3 1]
+    [2 2]
+    [1 3]
+    [0 4]]
+    >> print(_generate_coords(G,1))
+    [[2 0]
+    [1 1]
+    [0 2]
+    [4 3]
+    [3 4]]
+    
+    """
+    return np.array([(input_grid[XO][i],i) for i in range(len(input_grid[XO]))])
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def _find_next_O(O_perm,Xpos):
+    r"""
+    Finds the position of the following O marking, given the O markings
+    of a grid and an X marking position. This is achieved by tracing
+    vertically along the specified column as per the X marking position
+    until the O marking is identified. Follows the orientation of X towards O 
+    vertically in a grid.
+
+    OUTPUT:
+
+    A tuple of integers.
+
+    EXAMPLE::
+
+    >> G = generate_torus_link(3,2)
+    >> posX = (G[0][0],0)
+    >> print(_find_next_Opos(G[1],posX))
+    (4,3)
+
+    """
+    n = len(O_perm)
+    for i in range(n):
+        if O_perm[i][0]==Xpos[0]:
+            return O_perm[i]
+        
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def _find_next_X(X_perm,Opos):
+    r"""
+    Finds the position of the following X marking, given the X markings
+    of a grid and an O marking position. This is achieved by tracing
+    horizontally along the specified column as per the O marking position
+    until the X marking is identified. Follows the orientation of O towards X 
+    horizontally in a grid.
+
+    OUTPUT:
+
+    A tuple of integers.
+
+    EXAMPLE::
+
+    >> G = generate_torus_link(3,2)
+    >> posX = (G[0][0],0)
+    >> posO = _find_next_Opos(G[1],posX))
+    >> print(_find_next_X(G[0],posO))
+    (2,3)
+
+    """
+    n = len(X_perm)
+    for i in range(n):
+        if X_perm[i][1]==Opos[1]:
+            return X_perm[i]
+        
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def _generate_vertices(input_grid,extra=True):
+    r"""
+    Generates an array that contains all the vertices of the polygon implicit
+    in the grid of a knot, in order of an arbitray walk through the polygon,
+    starting from the first X marking on the bottom of the grid, following
+    the prescribed conventions. If extra = False, then the array will be such
+    that out[0]==out[n] for n positions. Note that as yet, this function works
+    only on knots and not links.
+
+    OUTPUT:
+
+    An array of tuples of integers.
+
+    EXAMPLES::
+
+    >> G = generate_torus_link(3,2)
+    >> print(_generate_vertices(G))
+    [[4. 0.]
+    [4. 3.]
+    [1. 3.]
+    [1. 1.]
+    [3. 1.]
+    [3. 4.]
+    [0. 4.]
+    [0. 2.]
+    [2. 2.]
+    [2. 0.]
+    [4. 0.]
+    [4. 3.]]
+    >> print(_generate_vertices(G,extra=False))
+    [[4. 0.]
+    [4. 3.]
+    [1. 3.]
+    [1. 1.]
+    [3. 1.]
+    [3. 4.]
+    [0. 4.]
+    [0. 2.]
+    [2. 2.]
+    [2. 0.]
+    [4. 0.]]
+
+    """
+    X = _generate_coords(input_grid,0)
+    O = _generate_coords(input_grid,1)
+    first_pos = X[0]
+    next_pos = _find_next_O(O,first_pos)
+    X_mark = False
+    n = len(X)
+    if extra:
+        out = np.zeros((2*n+2,2))
+    else:
+        out = np.zeros((2*n+1,2))
+    out[0] = first_pos
+    i = 1
+    while np.array_equal(first_pos,next_pos) == False:
+        prev_pos = next_pos
+        out[i] = prev_pos
+        if X_mark:
+            next_pos = _find_next_O(O,prev_pos)
+            i += 1
+            X_mark = not X_mark
+        else:
+            next_pos = _find_next_X(X,prev_pos)
+            i += 1
+            X_mark = not X_mark
+    out[2*n] = first_pos
+    if extra:
+        out[2*n+1] = _find_next_O(O,first_pos) # necessary to measure the final direction
+    return out
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def _find_turn(init,fin):
+    r"""
+    Generates a string that describes the direction of a move, either "Up",
+    "Down","Right", or "Left". This is achieved by comparing coordinates with
+    direction assigned from the universal perspective with orientation inherited
+    from prescribed conventions. Note that the tuples are Cartesian coordinates.
+
+    OUTPUT:
+
+    A string.
+
+    EXAMPLES::
+
+    >> print(find_turn((0,0),(0,1)))
+    'Up'
+    >> print(find_turn((0,0),(1,0)))
+    'Left'
+
+    """
+    if np.array_equal(init,fin):
+        raise Exception("No move occured. Check initial and final positions.")
+    elif init[0] < fin[0]:
+        return 'Right'
+    elif init[1] < fin[1]:
+        return 'Up'
+    elif init[0] > fin[0]:
+        return 'Left'
+    else:
+        return 'Down'
+    
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def _find_turn_direction(prev,next):
+    r"""
+    Determines the orientation between two turns; clockwise:
+    'CW' or counterclockwise: 'CCW'. This is achieved by
+    logically checking the direction of the two turns.
+
+    OUTPUT:
+
+    A string.
+
+    EXAMPLES::
+    
+    >> print(find_turn_direction('Up','Left'))
+    'CCW'
+    >> print(find_turn_direction('Down','Left'))
+    'CW'
+
+    """
+    if (prev == 'Up' and next == 'Left') or (prev == 'Left' and next == 'Down') or (prev == 'Down' and next == 'Right') or (prev == 'Right' and next == 'Up'):
+        return "CCW"
+    else:
+        return "CW"
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    
+def _list_all_turns(input_grid):
+    r"""
+    Generates an array that contains all the turns - that are of the form
+    'Left'/'Right'/'Up'/'Down' - in a walk around the polygon generated by 
+    a knot grid, as specified by the pertaining conventions.
+
+    OUTPUT:
+
+    An array of strings.
+
+    EXAMPLES::
+
+    >> G = generate_torus_link(3,2)
+    >> print(_list_all_turns(G))
+    ['Up' 'Left' 'Down' 'Right' 'Up' 'Left' 'Down' 'Right' 'Down' 'Right' 'Up']
+
+    """
+    pos = _generate_vertices(input_grid)
+    out = []
+    for i in range(len(pos)-1):
+        out.append(_find_turn(pos[i],pos[i+1]))
+    return np.array(out)
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def _find_all_turn_directions(turns):
+    r"""
+    Generates an array of turn orientations ('CCW' or 'CW') based on
+    an input of turns (irrespective of how the turns are generated).
+
+    OUTPUT:
+
+    An array of strings.
+
+    EXAMPLES::
+    
+    >> turns = ['Down','Left','Down','Right']
+    >> print(_find_all_turn_directions(turns))
+    ['CW' 'CCW' 'CCW']
+    >> G = generate_torus_link(3,2)
+    >> turns = _list_all_turns(G)
+    >> print(_find_all_turn_directions(turns))
+    ['CCW' 'CCW' 'CCW' 'CCW' 'CCW' 'CCW' 'CCW' 'CW' 'CCW' 'CCW']
+
+    """
+    out = []
+    for i in range(len(turns)-1):
+        out.append(_find_turn_direction(turns[i],turns[i+1]))
+    return np.array(out)
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
