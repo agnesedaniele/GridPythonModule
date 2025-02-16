@@ -1837,6 +1837,31 @@ def uncoherent_bs(input_grid, where, which = 'rows'):
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+def winding_number(point,input_grid):
+    r"""
+    Computes the winding number of a point with respect to a knot grid diagram. This is
+    achieved by treating the grid as a complex polygon and running through an algorithm
+    created by Dan Sunday. It is important to note that this function treats the grid as
+    shifted by 0.5 units in both directions. Orientation is prescribed in the usual way.
+    Note also that this function works only for knots and not links, as yet.
+
+    OUTPUT:
+
+    An integer.
+
+    EXAMPLES::
+
+    >> G = generate_torus_link(3,2)
+    >> print(winding_number((0,0),G))
+    0
+    >> print(winding_number((1.5,1.5),G))
+    1
+
+    """
+    return _winding_number_poly(point,_generate_vertices(input_grid,extra=False)+0.5)
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 def writhe(input_grid):
     r"""
     Computes the writhe of the grid; this is the number of positive crossing minus the
@@ -2151,6 +2176,66 @@ def _can_simplify(input_grid):
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+def _is_left(p0,p1,p2):
+    r"""
+    Determines if a point is left, right, or on a given straight line (specified
+    by the points p0 and p1). Returns a value greater than/equal/less than 0 if 
+    the point p2 is left/on/right of the line. It is an auxiliary function for the
+    winding_num_poly function. This algorithm was created by Dan
+    Sunday.
 
+    OUTPUT:
 
+    An integer.
 
+    EXAMPLES::
+
+    >> print(_is_left((0,0),(0,2),(2,3)))
+    -4
+    >> is_left((0,0),(0,2),(-2,3))
+    4
+    >> print(_is_left((0,0),(0,2),(0,1)))
+    0
+
+    """
+    return((p1[0]-p0[0])*(p2[1]-p0[1])-(p2[0]-p0[0])*(p1[1]-p0[1]))
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+def _winding_number_poly(p,vertices):
+    r"""
+    Computes the winding number for a given point around a specified polygon,
+    determined by its vertices. This algorithm was created by Dan Sunday
+    (see https://web.archive.org/web/20130126163405/http://geomalgorithms.com/a03-_inclusion.html).
+    Note that this function also follows the convention that a point is of the form (row,col).
+    Note also that orientation is prescribed in the usual way. Finally, note that
+    len(vertices) = n+1 because vertices[0]=vertices[n].
+
+    OUTPUT:
+
+    An integer.
+
+    EXAMPLES::
+    
+    >> G = generate_torus_link(3,2)
+    >> verts = _generate_vertices(G,extra=False)
+    >> print(_winding_number_poly((0,0),verts))
+    0
+    >> print(_winding_number_poly((1,1),verts))
+    1
+
+    """
+    n = len(vertices)-1
+    wn = 0
+    for i in range(n):
+        if vertices[i][1] <= p[1]:
+            if vertices[i+1][1] > p[1]:
+                if _is_left(vertices[i],vertices[i+1],p) > 0:
+                    wn += 1
+        else:
+            if vertices[i+1][1] <= p[1]:
+                if _is_left(vertices[i],vertices[i+1],p) < 0:
+                    wn -= 1
+    return wn
+ 
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
