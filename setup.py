@@ -11,8 +11,7 @@ setup(
     packages=['GridPythonModule'],
     install_requires=['simpy',
                       'random2',
-                      'matplotlib',
-                      'numpy'
+                      'matplotlib'
                       ],
 
     classifiers=[

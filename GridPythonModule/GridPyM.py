@@ -33,7 +33,6 @@
 from sympy.combinatorics import Permutation
 from random import randrange
 from matplotlib import pyplot as plt
-import numpy as np
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
