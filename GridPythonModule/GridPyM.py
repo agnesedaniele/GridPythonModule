@@ -33,6 +33,7 @@
 from sympy.combinatorics import Permutation
 from random import randrange
 from matplotlib import pyplot as plt
+import numpy as np
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1772,6 +1773,53 @@ def thurston_bennequin(input_grid):
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+def turning_number(input_grid):
+    r"""
+    Calculates the turning number of a knot grid diagram, using
+    the orientation O ----> X horizontally.
+
+    OUTPUT:
+
+    An integer.
+
+    EXAMPLES::
+
+    >> G = generate_torus_link(3,2)
+    >> print(turning_number(G))
+    2
+    >> K = load_knot('5_2')
+    >> print(turning_number(K))
+    0
+
+    """
+    turning = 0
+    XX = np.array(input_grid[0])
+    OO = np.array(input_grid[1])
+    for t in range(grid_number(input_grid)):
+        if OO[t] < XX[t]:
+            if np.where(OO==XX[t])[0][0] < t:
+                turning -= 1
+            else:
+                turning += 1
+            if np.where(XX==OO[t])[0][0] < t:
+                turning -= 1
+            else:
+                turning += 1
+        if OO[t] > XX[t]:
+            if np.where(OO==XX[t])[0][0] < t:
+                turning += 1
+            else:
+                turning -= 1
+            if np.where(XX==OO[t])[0][0] < t:
+                turning += 1
+            else:
+                turning -= 1
+    if turning%4 != 0:
+        print('There is something fishy going on here!')
+    return turning/4
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 def uncoherent_bs(input_grid, where, which = 'rows'):
     r"""
     Performs a uncoherent band attachment on the grid. Can choose between a row/column
@@ -2150,7 +2198,3 @@ def _can_simplify(input_grid):
         return False
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-
-
