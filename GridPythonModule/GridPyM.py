@@ -1798,7 +1798,7 @@ def turning_number(input_grid):
     for t in range(grid_number(input_grid)):
         if OO[t] < XX[t]:
             if OO.index(XX[t]) < t:
-                turning += -1
+                turning -= 1
             else:
                 turning += 1
             if XX.index(OO[t]) < t:
