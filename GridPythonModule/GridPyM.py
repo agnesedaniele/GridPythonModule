@@ -1793,24 +1793,24 @@ def turning_number(input_grid):
 
     """
     turning = 0
-    XX = input_grid[0]
-    OO = input_grid[1]
+    XX = np.array(input_grid[0])
+    OO = np.array(input_grid[1])
     for t in range(grid_number(input_grid)):
         if OO[t] < XX[t]:
-            if OO.index(XX[t]) < t:
+            if np.where(OO==XX[t])[0][0] < t:
                 turning -= 1
             else:
                 turning += 1
-            if XX.index(OO[t]) < t:
+            if np.where(XX==OO[t])[0][0] < t:
                 turning -= 1
             else:
                 turning += 1
         if OO[t] > XX[t]:
-            if OO.index(XX[t]) < t:
+            if np.where(OO==XX[t])[0][0] < t:
                 turning += 1
             else:
                 turning -= 1
-            if XX.index(OO[t]) < t:
+            if np.where(XX==OO[t])[0][0] < t:
                 turning += 1
             else:
                 turning -= 1
