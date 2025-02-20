@@ -33,6 +33,7 @@
 from sympy.combinatorics import Permutation
 from random import randrange
 from matplotlib import pyplot as plt
+import numpy as np
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1842,8 +1843,15 @@ def winding_number(point,input_grid):
     Computes the winding number of a point with respect to a knot grid diagram. This is
     achieved by treating the grid as a complex polygon and running through an algorithm
     created by Dan Sunday. It is important to note that this function treats the grid as
-    shifted by 0.5 units in both directions. Orientation is prescribed in the usual way.
-    Note also that this function works only for knots and not links, as yet.
+    shifted by 0.5 units in both directions. Note that this function also follows the
+    convention that a point is defined in the usual Cartesian sense.
+    
+    Orientation of the knot is prescribed in the usual way, following the convention of
+    O--->X horizontally and X--->O vertically. Note also that this function works only
+    for knots and not links, as yet.
+
+    The algorithm was created by Dan Sunday
+    (see https://web.archive.org/web/20130126163405/http://geomalgorithms.com/a03-_inclusion.html).
 
     OUTPUT:
 
@@ -1858,7 +1866,47 @@ def winding_number(point,input_grid):
     1
 
     """
-    return _winding_number_poly(point,_generate_vertices(input_grid,extra=False)+0.5)
+    n = grid_number(input_grid)
+    XX = np.array(input_grid[0])
+    OO = np.array(input_grid[1])
+    
+    vertices = np.ones((2*n+1,2))
+    first_pos = (XX[0],0)
+    vertices[0] = first_pos
+    val = first_pos[0]
+    idx = np.where(OO==val)[0][0]
+    next_pos = (val,idx)
+    X_mark = False
+    i = 1
+    while np.array_equal(first_pos,next_pos) == False:
+        prev_pos = next_pos
+        vertices[i] = prev_pos
+        if X_mark:
+            val = prev_pos[0]
+            idx = np.where(OO==val)[0][0]
+            next_pos = (val,idx)
+            X_mark = not X_mark
+            i += 1
+        else:
+            val = prev_pos[1]
+            idx = np.where(XX==val)[0][0]
+            next_pos = (idx,val)
+            X_mark = not X_mark
+            i += 1
+    vertices[2*n] = first_pos
+    vertices = vertices + 0.5
+    
+    winding = 0
+    for i in range(2*n):
+        if vertices[i,1] <= point[1]:
+            if vertices[i+1,1] > point[1]:
+                if _is_left(vertices[i],vertices[i+1],point) > 0:
+                    winding += 1
+        else:
+            if vertices[i+1,1] <= point[1]:
+                if _is_left(vertices[i],vertices[i+1],point) < 0:
+                    winding -= 1
+    return winding
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -2191,51 +2239,18 @@ def _is_left(p0,p1,p2):
     EXAMPLES::
 
     >> print(_is_left((0,0),(0,2),(2,3)))
+
     -4
+
     >> is_left((0,0),(0,2),(-2,3))
+
     4
+
     >> print(_is_left((0,0),(0,2),(0,1)))
+
     0
 
     """
     return((p1[0]-p0[0])*(p2[1]-p0[1])-(p2[0]-p0[0])*(p1[1]-p0[1]))
 
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-def _winding_number_poly(p,vertices):
-    r"""
-    Computes the winding number for a given point around a specified polygon,
-    determined by its vertices. This algorithm was created by Dan Sunday
-    (see https://web.archive.org/web/20130126163405/http://geomalgorithms.com/a03-_inclusion.html).
-    Note that this function also follows the convention that a point is of the form (row,col).
-    Note also that orientation is prescribed in the usual way. Finally, note that
-    len(vertices) = n+1 because vertices[0]=vertices[n].
-
-    OUTPUT:
-
-    An integer.
-
-    EXAMPLES::
-    
-    >> G = generate_torus_link(3,2)
-    >> verts = _generate_vertices(G,extra=False)
-    >> print(_winding_number_poly((0,0),verts))
-    0
-    >> print(_winding_number_poly((1,1),verts))
-    1
-
-    """
-    n = len(vertices)-1
-    wn = 0
-    for i in range(n):
-        if vertices[i][1] <= p[1]:
-            if vertices[i+1][1] > p[1]:
-                if _is_left(vertices[i],vertices[i+1],p) > 0:
-                    wn += 1
-        else:
-            if vertices[i+1][1] <= p[1]:
-                if _is_left(vertices[i],vertices[i+1],p) < 0:
-                    wn -= 1
-    return wn
- 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
