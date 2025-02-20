@@ -33,6 +33,7 @@
 from sympy.combinatorics import Permutation
 from random import randrange
 from matplotlib import pyplot as plt
+import numpy as np
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1837,6 +1838,78 @@ def uncoherent_bs(input_grid, where, which = 'rows'):
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+def winding_number(point,input_grid):
+    r"""
+    Computes the winding number of a point with respect to a knot grid diagram. This is
+    achieved by treating the grid as a complex polygon and running through an algorithm
+    created by Dan Sunday. It is important to note that this function treats the grid as
+    shifted by 0.5 units in both directions. Note that this function also follows the
+    convention that a point is defined in the usual Cartesian sense.
+    
+    Orientation of the knot is prescribed in the usual way, following the convention of
+    O--->X horizontally and X--->O vertically. Note also that this function works only
+    for knots and not links, as yet.
+
+    The algorithm was created by Dan Sunday
+    (see https://web.archive.org/web/20130126163405/http://geomalgorithms.com/a03-_inclusion.html).
+
+    OUTPUT:
+
+    An integer.
+
+    EXAMPLES::
+
+    >> G = generate_torus_link(3,2)
+    >> print(winding_number((0,0),G))
+    0
+    >> print(winding_number((1.5,1.5),G))
+    1
+
+    """
+    n = grid_number(input_grid)
+    XX = np.array(input_grid[0])
+    OO = np.array(input_grid[1])
+    
+    vertices = np.ones((2*n+1,2))
+    first_pos = (XX[0],0)
+    vertices[0] = first_pos
+    val = first_pos[0]
+    idx = np.where(OO==val)[0][0]
+    next_pos = (val,idx)
+    X_mark = False
+    i = 1
+    while np.array_equal(first_pos,next_pos) == False:
+        prev_pos = next_pos
+        vertices[i] = prev_pos
+        if X_mark:
+            val = prev_pos[0]
+            idx = np.where(OO==val)[0][0]
+            next_pos = (val,idx)
+            X_mark = not X_mark
+            i += 1
+        else:
+            val = prev_pos[1]
+            idx = np.where(XX==val)[0][0]
+            next_pos = (idx,val)
+            X_mark = not X_mark
+            i += 1
+    vertices[2*n] = first_pos
+    vertices = vertices + 0.5
+    
+    winding = 0
+    for i in range(2*n):
+        if vertices[i,1] <= point[1]:
+            if vertices[i+1,1] > point[1]:
+                if _is_left(vertices[i],vertices[i+1],point) > 0:
+                    winding += 1
+        else:
+            if vertices[i+1,1] <= point[1]:
+                if _is_left(vertices[i],vertices[i+1],point) < 0:
+                    winding -= 1
+    return winding
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 def writhe(input_grid):
     r"""
     Computes the writhe of the grid; this is the number of positive crossing minus the
@@ -2151,6 +2224,33 @@ def _can_simplify(input_grid):
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+def _is_left(p0,p1,p2):
+    r"""
+    Determines if a point is left, right, or on a given straight line (specified
+    by the points p0 and p1). Returns a value greater than/equal/less than 0 if 
+    the point p2 is left/on/right of the line. It is an auxiliary function for the
+    winding_num_poly function. This algorithm was created by Dan
+    Sunday.
 
+    OUTPUT:
 
+    An integer.
 
+    EXAMPLES::
+
+    >> print(_is_left((0,0),(0,2),(2,3)))
+
+    -4
+
+    >> is_left((0,0),(0,2),(-2,3))
+
+    4
+
+    >> print(_is_left((0,0),(0,2),(0,1)))
+
+    0
+
+    """
+    return((p1[0]-p0[0])*(p2[1]-p0[1])-(p2[0]-p0[0])*(p1[1]-p0[1]))
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
